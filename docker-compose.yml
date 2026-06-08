@@ -1,0 +1,39 @@
+services:
+  api:
+    build: .
+    command: python -m uvicorn rag_compliance_assistant.api.main:app --host 0.0.0.0 --port 8000
+    environment:
+      EMBEDDING_PROVIDER: mock
+      LLM_PROVIDER: mock
+      VECTOR_STORE_PATH: /app/data/vector_store/index.json
+      TRACE_DB_PATH: /app/data/traces/traces.db
+      EVAL_REPORT_PATH: /app/reports/eval/evaluation_report.json
+    ports:
+      - "8000:8000"
+    volumes:
+      - rag_vector_store:/app/data/vector_store
+      - rag_traces:/app/data/traces
+      - rag_reports:/app/reports
+
+  ui:
+    build: .
+    command: python -m streamlit run src/rag_compliance_assistant/ui/app.py --server.address 0.0.0.0 --server.port 8501
+    environment:
+      EMBEDDING_PROVIDER: mock
+      LLM_PROVIDER: mock
+      VECTOR_STORE_PATH: /app/data/vector_store/index.json
+      TRACE_DB_PATH: /app/data/traces/traces.db
+      EVAL_REPORT_PATH: /app/reports/eval/evaluation_report.json
+    ports:
+      - "8501:8501"
+    volumes:
+      - rag_vector_store:/app/data/vector_store
+      - rag_traces:/app/data/traces
+      - rag_reports:/app/reports
+    depends_on:
+      - api
+
+volumes:
+  rag_vector_store:
+  rag_traces:
+  rag_reports:
